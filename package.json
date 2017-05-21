@@ -12,6 +12,7 @@
     "node": "~6.9.1"
   },
   "scripts": {
+    "reset": "docker-compose kill && ./clean.sh && docker-compose up --force-recreate",
     "start": "docker-compose up",
     "install": "npm run getbaseimage && npm run govend && docker-compose pull && docker-compose build",
     "getbaseimage": "docker pull hyperledger/fabric-baseimage:x86_64-0.2.2 && docker tag hyperledger/fabric-baseimage:x86_64-0.2.2 hyperledger/fabric-baseimage:latest",

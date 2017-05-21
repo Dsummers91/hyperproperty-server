@@ -27,8 +27,12 @@ class App {
 
     // initialize routing
     useExpressServer(app, {
-      routePrefix: '/api/v1',
+      routePrefix: '',
       controllers: [__dirname + '/api/v1/*.js']
+    });
+
+    app.get('/', (req, res) => {
+      res.send({success: true});
     });
 
     // Log requests

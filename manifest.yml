@@ -1,15 +1,15 @@
 applications:
-- name: APPNAME-server
-  host: APPNAME-api
+- name: monopoly-server
+  host: monopoly-api
   path: server
   memory: 512M
   instances: 1
   disk_quota: 1024M
   command: "NODE_ENV=production node dist/app.js"
-- name: APPNAME-client
-  host: APPNAME
+- name: monopoly-client
+  host: monopoly
   path: client/dist
   memory: 64M
   buildpack: https://github.com/cloudfoundry/staticfile-buildpack.git
 services:
-- BLOCKCHAINSERVICENAME
+- Blockchain-2z

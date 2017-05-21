@@ -1,13 +1,23 @@
 {
   "users": [
     {
-      "userID": "john",
-      "username": "john",
-      "password": "passw0rd",
+      "userID": "player1",
+      "username": "player1",
+      "password": "player1",
       "attributes": [
         {
           "name": "userID",
-          "value": "john"
+          "value": "player1"
+        }
+      ]
+    }, {
+      "userID": "player2",
+      "username": "player2",
+      "password": "player2",
+      "attributes": [
+        {
+          "name": "userID",
+          "value": "player2"
         }
       ]
     }

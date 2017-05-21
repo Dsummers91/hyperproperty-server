@@ -30,6 +30,9 @@
     ],
     "files": [
         "src/api/v1/AuthController.ts",
+        "src/api/v1/BoardController.ts",
+        "src/api/v1/HomeController.ts",
+        "src/api/v1/PlayerController.ts",
         "src/api/v1/ThingsController.ts",
         "src/auth/AuthController.ts",
         "src/auth/ClientAuthenticator.ts",

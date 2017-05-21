@@ -1,16 +1,19 @@
 package main
 
 import (
+	"build-chaincode/entities"
+	"build-chaincode/monopoly"
+	"build-chaincode/util"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"os"
-	"build-chaincode/util"
-	"build-chaincode/entities"
+
+	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
 var logger = shim.NewLogger("fabric-boilerplate")
+
 //======================================================================================================================
 //	 Structure Definitions
 //======================================================================================================================
@@ -36,22 +39,12 @@ func (t *Chaincode) Invoke(stub shim.ChaincodeStubInterface, functionName string
 		return nil, t.addUser(stub, args[0], args[1])
 	} else if functionName == "addTestdata" {
 		return nil, t.addTestdata(stub, args[0])
-	} else if functionName == "createThing" {
-		thingAsJSON := args[0]
-
-		var thing entities.Thing
-		if err := json.Unmarshal([]byte(thingAsJSON), &thing); err != nil {
-			return nil, errors.New("Error while unmarshalling thing, reason: " + err.Error())
-		}
-
-		thingAsBytes, err := json.Marshal(thing);
-		if err != nil {
-			return nil, errors.New("Error marshalling thing, reason: " + err.Error())
-		}
-
-		util.StoreObjectInChain(stub, thing.ThingID, util.ThingsIndexName, thingAsBytes)
-
-		return nil, nil
+	} else if functionName == "rollDice" {
+		return nil, monopoly.RollDice(stub)
+	} else if functionName == "playeraction" {
+		return nil, monopoly.PlayerAction(stub, args[0])
+	} else if functionName == "playerstart" {
+		return nil, monopoly.InitializeGame(stub)
 	}
 
 	return nil, errors.New("Received unknown invoke function name")
@@ -94,6 +87,8 @@ func (t *Chaincode) GetQueryResult(stub shim.ChaincodeStubInterface, functionNam
 		}
 
 		return thingsByUserID, nil
+	} else if functionName == "getCurrentState" {
+		return monopoly.GetCurrentState(stub)
 	}
 
 	return nil, errors.New("Received unknown query function name")
@@ -143,14 +138,19 @@ func (t *Chaincode) addUser(stub shim.ChaincodeStubInterface, index string, user
 }
 
 func (t *Chaincode) addTestdata(stub shim.ChaincodeStubInterface, testDataAsJson string) error {
+
+	err := monopoly.InitializeGame(stub)
+	if err != nil {
+		return errors.New("Error initilizing Game")
+	}
 	var testData entities.TestData
-	err := json.Unmarshal([]byte(testDataAsJson), &testData)
+	err = json.Unmarshal([]byte(testDataAsJson), &testData)
 	if err != nil {
 		return errors.New("Error while unmarshalling testdata")
 	}
 
 	for _, user := range testData.Users {
-		userAsBytes, err := json.Marshal(user);
+		userAsBytes, err := json.Marshal(user)
 		if err != nil {
 			return errors.New("Error marshalling testUser, reason: " + err.Error())
 		}
@@ -162,7 +162,7 @@ func (t *Chaincode) addTestdata(stub shim.ChaincodeStubInterface, testDataAsJson
 	}
 
 	for _, thing := range testData.Things {
-		thingAsBytes, err := json.Marshal(thing);
+		thingAsBytes, err := json.Marshal(thing)
 		if err != nil {
 			return errors.New("Error marshalling testThing, reason: " + err.Error())
 		}
@@ -180,11 +180,11 @@ func (t *Chaincode) addTestdata(stub shim.ChaincodeStubInterface, testDataAsJson
 //		Query Functions
 //======================================================================================================================
 
-func (t *Chaincode) authenticateAsUser(stub shim.ChaincodeStubInterface, user entities.User, passwordHash string) (entities.UserAuthenticationResult) {
+func (t *Chaincode) authenticateAsUser(stub shim.ChaincodeStubInterface, user entities.User, passwordHash string) entities.UserAuthenticationResult {
 	if user == (entities.User{}) {
 		fmt.Println("User not found")
 		return entities.UserAuthenticationResult{
-			User: user,
+			User:          user,
 			Authenticated: false,
 		}
 	}
@@ -192,14 +192,13 @@ func (t *Chaincode) authenticateAsUser(stub shim.ChaincodeStubInterface, user en
 	if user.Hash != passwordHash {
 		fmt.Println("Hash does not match")
 		return entities.UserAuthenticationResult{
-			User: user,
+			User:          user,
 			Authenticated: false,
 		}
 	}
 
 	return entities.UserAuthenticationResult{
-		User: user,
+		User:          user,
 		Authenticated: true,
 	}
 }
-

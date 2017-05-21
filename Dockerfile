@@ -36,7 +36,7 @@ RUN cd /tmp \
  && mv /tmp/node_modules /usr/src/app/client/node_modules
 
 # RUN rm -rf /tmp/*
-ENV API_ENDPOINT "https://api.eu-gb.bluemix.net"
+ENV API_ENDPOINT "https://api.ng.bluemix.net"
 ENV GOPATH "/usr/src/app/blockchain"
 ENV NODE_ENV "production"
 
